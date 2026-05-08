@@ -1,0 +1,9 @@
+﻿FEEDBACK {
+    SCORE: 85;
+    LEVEL: medium;
+    COMMENTS {
+        TEXT: "错误的关键字";
+        SUGGESTION: "修复";
+    }
+    ERRORS []
+}

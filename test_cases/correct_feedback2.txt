@@ -1,0 +1,9 @@
+﻿FEEDBACK {
+    SCORE: 95;
+    LEVEL: high;
+    COMMENT {
+        TEXT: "代码质量优秀，各方面都很规范";
+        SUGGESTION: "继续保持";
+    }
+    ERRORS []
+}

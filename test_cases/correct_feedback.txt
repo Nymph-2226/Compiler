@@ -1,0 +1,11 @@
+﻿FEEDBACK {
+    SCORE: 85;
+    LEVEL: medium;
+    COMMENT {
+        TEXT: "代码逻辑清晰，算法实现正确";
+        SUGGESTION: "建议添加类型注解";
+    }
+    ERRORS [
+        ERROR(line:5, type:logic, msg:"边界条件未处理");
+    ]
+}
