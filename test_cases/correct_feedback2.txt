@@ -1,4 +1,4 @@
-﻿FEEDBACK {
+FEEDBACK {
     SCORE: 95;
     LEVEL: high;
     COMMENT {
