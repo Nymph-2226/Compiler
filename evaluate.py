@@ -207,22 +207,42 @@ class FeedbackParser:
     
     def _parse_output(self, output: str, enable_extensions: bool) -> Tuple[bool, Dict, str]:
         try:
-            if "FEEDBACK" in output:
-                start_idx = output.find("FEEDBACK")
-                brace_count = 0
-                end_idx = start_idx
-                for i, ch in enumerate(output[start_idx:], start_idx):
-                    if ch == '{':
-                        brace_count += 1
-                    elif ch == '}':
-                        brace_count -= 1
-                        if brace_count == 0:
-                            end_idx = i + 1
-                            break
-                if end_idx > start_idx:
-                    output = output[start_idx:end_idx]
-            
-            ast = parse_text(output, enable_extensions)
+            # 找到 FEEDBACK 关键字的位置
+            start_idx = output.find("FEEDBACK")
+            if start_idx == -1:
+                return False, {}, "未找到 FEEDBACK 关键字"
+        
+            # 找到匹配的结束括号
+            brace_count = 0
+            end_idx = start_idx
+            found_feedback = False
+        
+            for i, ch in enumerate(output[start_idx:], start_idx):
+                if ch == '{':
+                    brace_count += 1
+                    found_feedback = True
+                elif ch == '}':
+                    brace_count -= 1
+                    if brace_count == 0 and found_feedback:
+                        end_idx = i + 1
+                        break
+        
+            if end_idx <= start_idx:
+                return False, {}, "无法找到完整的 FEEDBACK 块"
+        
+            # 提取 FEEDBACK 块
+            feedback_text = output[start_idx:end_idx]
+        
+            # 预处理：处理空 ERRORS 列表的情况
+            # 将 "ERRORS [ ];" 或 "ERRORS [];" 转换为 "ERRORS []"
+            import re
+            feedback_text = re.sub(r'ERRORS\s*\[\s*\]\s*;', 'ERRORS []', feedback_text)
+            feedback_text = re.sub(r'ERRORS\s*\[\s*\]', 'ERRORS []', feedback_text)
+        
+            print(f"提取的反馈块:\n{feedback_text}")  # 调试用
+        
+            # 解析
+            ast = parse_text(feedback_text, enable_extensions)
             result = extract_feedback_data(ast)
             return True, result, ""
         except ParseError as e:

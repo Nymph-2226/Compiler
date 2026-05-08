@@ -272,51 +272,46 @@ class EduParser:
         return node
     
     def parse_error_list(self) -> ASTNode:
-        """
-        ErrorList → KEYWORD_ERRORS LBRACKET ErrorItems RBRACKET
-        ErrorItems → ErrorItem ErrorItems | ε
-        ErrorItem → KEYWORD_ERROR LPAREN ErrorParams RPAREN SEMICOLON
-        ErrorParams → ParamList
-        ParamList → Param COMMA ParamList | Param
-        Param → line: NUMBER | type: IDENT | msg: STRING
-        """
         node = ASTNode("ErrorList")
-        
-        # 消费 ERRORS
         self.consume(TokenType.KEYWORD_ERRORS)
-        
-        # 消费 [
         self.consume(TokenType.LBRACKET)
-        
-        # 解析错误项列表（可以为空）
+    
+        # 处理空错误列表
+        if self.peek_type() == TokenType.RBRACKET:
+            self.consume(TokenType.RBRACKET)
+            # 允许可选的结束分号
+            if self.peek_type() == TokenType.SEMICOLON:
+                self.consume(TokenType.SEMICOLON)
+            return node
+    
+        # 非空列表
         error_items_node = self.parse_error_items()
         for child in error_items_node.children:
             node.add_child(child)
-        
-        # 消费 ]
         self.consume(TokenType.RBRACKET)
-        
+    
+        # 允许可选的分号
+        if self.peek_type() == TokenType.SEMICOLON:
+            self.consume(TokenType.SEMICOLON)
+    
         return node
     
     def parse_error_items(self) -> ASTNode:
-        """
-        ErrorItems → ErrorItem ErrorItems | ε
-        """
         node = ASTNode("ErrorItems")
-        
-        # 检查是否还有错误项
-        if self._at_end():
+    
+        # 检查是否到达末尾或者遇到右括号（空列表情况）
+        if self._at_end() or self.peek_type() == TokenType.RBRACKET:
             return node
-        
+    
         # 如果下一个Token是ERROR，继续解析
         if self.peek_type() == TokenType.KEYWORD_ERROR:
             node.add_child(self.parse_error_item())
-            
+        
             # 递归解析剩余错误项
             remaining = self.parse_error_items()
             for child in remaining.children:
                 node.add_child(child)
-        
+    
         return node
     
     def parse_error_item(self) -> ASTNode:
